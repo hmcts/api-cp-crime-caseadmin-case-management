@@ -606,6 +606,31 @@ components:
           description: Date the group was created
         resultingIntent:
           $ref: '#/components/schemas/ResultingIntent'
+        warning:
+          type: string
+          enum:
+            - CASE_COUNT_MISMATCH
+          description: Present only when the stored case count does not match the number of active cases returned
+        warningMessage:
+          type: string
+          description: Human-readable detail of the warning, present only when warning is set
+          example: "Stored case count (4) does not match the number of active cases returned by Progression (2). The two services may be out of sync."
+        warningDetails:
+          $ref: '#/components/schemas/GroupCaseWarningDetails'
+
+    GroupCaseWarningDetails:
+      type: object
+      description: Present only when warning is set
+      required:
+        - storedCaseCount
+        - actualCaseCount
+      properties:
+        storedCaseCount:
+          type: integer
+          description: Case count stored against the group
+        actualCaseCount:
+          type: integer
+          description: Number of active member cases actually returned
 
     GroupCaseResultingIntent:
       type: object

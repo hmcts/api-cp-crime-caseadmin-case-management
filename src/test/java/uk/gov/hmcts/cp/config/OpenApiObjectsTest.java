@@ -9,6 +9,7 @@ import uk.gov.hmcts.cp.openapi.model.DefendantAddress;
 import uk.gov.hmcts.cp.openapi.model.ErrorResponse;
 import uk.gov.hmcts.cp.openapi.model.ExtractCasesRequest;
 import uk.gov.hmcts.cp.openapi.model.GroupCaseResponse;
+import uk.gov.hmcts.cp.openapi.model.GroupCaseWarningDetails;
 import uk.gov.hmcts.cp.openapi.model.GroupMemberCase;
 import java.lang.reflect.Field;
 import java.time.Instant;
@@ -43,7 +44,14 @@ class OpenApiObjectsTest {
 
     @Test
     void generated_group_case_response_should_have_expected_fields() {
-        assertThat(GroupCaseResponse.class).hasDeclaredFields("groupId", "leadCase", "referredCaseId", "cases", "createdDate", "resultingIntent");
+        assertThat(GroupCaseResponse.class).hasDeclaredFields(
+                "groupId", "leadCase", "referredCaseId", "cases", "caseCount", "createdDate",
+                "resultingIntent", "warning", "warningMessage", "warningDetails");
+    }
+
+    @Test
+    void generated_group_case_warning_details_should_have_expected_fields() {
+        assertThat(GroupCaseWarningDetails.class).hasDeclaredFields("storedCaseCount", "actualCaseCount");
     }
 
     @Test
