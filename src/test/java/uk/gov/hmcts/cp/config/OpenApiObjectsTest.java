@@ -12,6 +12,7 @@ import uk.gov.hmcts.cp.openapi.model.GroupCaseResponse;
 import uk.gov.hmcts.cp.openapi.model.GroupMemberCase;
 import java.lang.reflect.Field;
 import java.time.Instant;
+import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
@@ -25,7 +26,14 @@ class OpenApiObjectsTest {
     void generated_create_group_case_request_should_have_expected_fields() {
         assertThat(CreateGroupCaseRequest.class).hasDeclaredFields(
                 "groupId", "leadCase", "dateOfHearing", "caseCount", "offenceType",
-                "courtHearingLocation", "prosecutingAuthority", "parentGroupId", "resultingIntent");
+                "courtHearingLocation", "courtCentreId", "courtroomId", "prosecutingAuthority",
+                "prosecutingAuthorityName", "parentGroupId", "resultingIntent");
+    }
+
+    @Test
+    void generated_create_group_case_request_court_ids_should_be_uuids() throws Exception {
+        assertThat(CreateGroupCaseRequest.class.getDeclaredField("courtCentreId").getType()).isEqualTo(UUID.class);
+        assertThat(CreateGroupCaseRequest.class.getDeclaredField("courtroomId").getType()).isEqualTo(UUID.class);
     }
 
     @Test

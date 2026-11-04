@@ -10,8 +10,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 class ResultingIntentTest {
 
     @Test
-    void enum_contains_only_adjourn_and_withdraw() {
-        assertThat(ResultingIntent.values()).containsExactly(ResultingIntent.ADJOURN, ResultingIntent.WITHDRAW);
+    void enum_contains_grant_adjourn_and_withdraw() {
+        assertThat(ResultingIntent.values()).containsExactly(ResultingIntent.GRANT, ResultingIntent.ADJOURN, ResultingIntent.WITHDRAW);
+    }
+
+    @Test
+    void from_value_grant() {
+        assertThat(ResultingIntent.fromValue("GRANT")).isEqualTo(ResultingIntent.GRANT);
     }
 
     @Test
@@ -25,7 +30,7 @@ class ResultingIntentTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"GRANT", "adjourn", "Withdraw", "", "UNKNOWN"})
+    @ValueSource(strings = {"grant", "adjourn", "Withdraw", "", "UNKNOWN"})
     void from_unknown_value_throws_illegal_argument_exception(String value) {
         assertThatThrownBy(() -> ResultingIntent.fromValue(value))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -34,6 +39,7 @@ class ResultingIntentTest {
 
     @Test
     void get_value_returns_string() {
+        assertThat(ResultingIntent.GRANT.getValue()).isEqualTo("GRANT");
         assertThat(ResultingIntent.ADJOURN.getValue()).isEqualTo("ADJOURN");
         assertThat(ResultingIntent.WITHDRAW.getValue()).isEqualTo("WITHDRAW");
     }
