@@ -367,9 +367,11 @@ components:
     ResultingIntent:
       type: string
       description: >-
-        The intended result to be issued against the group case. Selected by the user when cases
-        are split out of a group.
+        The intended result to be issued against the group case. GRANT is the default for an
+        initial submission; ADJOURN or WITHDRAW is selected by the user when cases are split out
+        of a group.
       enum:
+        - GRANT
         - ADJOURN
         - WITHDRAW
 
@@ -387,9 +389,11 @@ components:
           description: Progression case id of the lead case
         caseUrn:
           type: string
+          maxLength: 255
           description: Case URN of the lead case
         defendantName:
           type: string
+          maxLength: 255
           description: Name of the lead defendant (personal data)
         defendantDoB:
           type: string
@@ -405,6 +409,7 @@ components:
         - caseCount
         - offenceType
         - courtHearingLocation
+        - courtCentreId
         - prosecutingAuthority
       properties:
         groupId:
@@ -423,13 +428,33 @@ components:
           description: Number of cases in the group
         offenceType:
           type: string
+          maxLength: 250
           description: Type of offence, for example Council Tax or Business Rates
         courtHearingLocation:
           type: string
+          minLength: 7
+          maxLength: 7
           description: Court location as OU code (7 characters, final 2 denote the courtroom)
+        courtCentreId:
+          type: string
+          format: uuid
+          description: >-
+            Reference data id of the court centre for courtHearingLocation, as already resolved by
+            the caller
+        courtroomId:
+          type: string
+          format: uuid
+          description: >-
+            Reference data id of the courtroom for courtHearingLocation, as already resolved by the
+            caller. Omitted when the OU code does not resolve to a courtroom.
         prosecutingAuthority:
           type: string
+          maxLength: 10
           description: Prosecuting authority as OU code
+        prosecutingAuthorityName:
+          type: string
+          maxLength: 255
+          description: Name of the prosecuting authority, as already resolved by the caller
         parentGroupId:
           type: string
           format: uuid

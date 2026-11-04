@@ -29,6 +29,7 @@ class CreateGroupCaseRequestValidationTest {
                 .caseCount(10)
                 .offenceType("Council Tax")
                 .courtHearingLocation("B01LY00")
+                .courtCentreId(UUID.randomUUID())
                 .prosecutingAuthority("GAEAA01");
     }
 
@@ -54,6 +55,8 @@ class CreateGroupCaseRequestValidationTest {
         var request = validRequest()
                 .parentGroupId(UUID.randomUUID())
                 .resultingIntent(ResultingIntent.WITHDRAW)
+                .courtroomId(UUID.randomUUID())
+                .prosecutingAuthorityName("Example Council")
                 .build();
 
         assertThat(validate(request)).isEmpty();
@@ -67,7 +70,43 @@ class CreateGroupCaseRequestValidationTest {
 
         assertThat(violatedProperties).containsExactlyInAnyOrder(
                 "groupId", "leadCase", "dateOfHearing", "caseCount", "offenceType",
-                "courtHearingLocation", "prosecutingAuthority");
+                "courtHearingLocation", "courtCentreId", "prosecutingAuthority");
+    }
+
+    @Test
+    void missing_court_centre_id_should_fail_validation() {
+        assertThat(validateProperty(validRequest().courtCentreId(null).build(), "courtCentreId")).isNotEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"B01LY0", "B01LY000", ""})
+    void court_hearing_location_not_seven_characters_should_fail_validation(String location) {
+        assertThat(validateProperty(validRequest().courtHearingLocation(location).build(), "courtHearingLocation")).isNotEmpty();
+    }
+
+    @Test
+    void prosecuting_authority_longer_than_ten_characters_should_fail_validation() {
+        assertThat(validateProperty(validRequest().prosecutingAuthority("GAEAA012345").build(), "prosecutingAuthority")).isNotEmpty();
+    }
+
+    @Test
+    void offence_type_longer_than_250_characters_should_fail_validation() {
+        assertThat(validateProperty(validRequest().offenceType("x".repeat(251)).build(), "offenceType")).isNotEmpty();
+    }
+
+    @Test
+    void offence_type_of_250_characters_should_pass_validation() {
+        assertThat(validateProperty(validRequest().offenceType("x".repeat(250)).build(), "offenceType")).isEmpty();
+    }
+
+    @Test
+    void lead_case_urn_longer_than_255_characters_should_fail_cascaded_validation() {
+        var leadCase = validLeadCase();
+        leadCase.setCaseUrn("x".repeat(256));
+
+        assertThat(validate(validRequest().leadCase(leadCase).build()))
+                .extracting(v -> v.getPropertyPath().toString())
+                .containsExactly("leadCase.caseUrn");
     }
 
     @Test
