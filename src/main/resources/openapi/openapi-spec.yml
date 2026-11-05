@@ -104,24 +104,39 @@ paths:
       operationId: searchGroupCases
       tags:
         - group-cases
-      summary: Search group cases by hearing location and date
+      summary: Search group cases by court centre and hearing date range
       description: >-
-        Returns a paginated summary list of group cases matching the hearing court location and date.
-        Member case ids are not returned. No matches returns 200 with an empty list.
-        Permission: view_group_case (Court Admin, Legal Advisor). Audit required: Yes.
+        Returns a paginated summary list of group cases matching the court centre, optional courtroom,
+        and hearing date range. Member case ids are not returned. No matches returns 200 with an empty
+        list. Permission: view_group_case (Court Admin, Legal Advisor). Audit required: Yes.
       parameters:
         - $ref: '#/components/parameters/CjscppuidHeader'
         - $ref: '#/components/parameters/CppclientcorrelationidHeader'
         - in: query
-          name: courtHearingLocation
+          name: courtCentreId
           required: true
-          description: Court house and room as a single OU code (7 characters, final 2 denote the courtroom)
+          description: Reference data id of the court centre to search hearings at
           schema:
             type: string
+            format: uuid
         - in: query
-          name: dateOfHearing
+          name: courtRoomId
+          required: false
+          description: Reference data id of the courtroom to narrow the search to, within courtCentreId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: startDate
           required: true
-          description: Date of the hearing
+          description: Start of the hearing date range to search (inclusive)
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: false
+          description: End of the hearing date range to search (inclusive). Defaults to startDate when omitted.
           schema:
             type: string
             format: date
@@ -469,6 +484,10 @@ components:
         - prosecutingAuthority
         - leadCase
         - resultingIntent
+        - dateOfHearing
+        - courtHearingLocation
+        - courtCentreId
+        - caseCount
       properties:
         groupId:
           type: string
@@ -480,6 +499,25 @@ components:
           $ref: '#/components/schemas/LeadCase'
         resultingIntent:
           $ref: '#/components/schemas/ResultingIntent'
+        dateOfHearing:
+          type: string
+          format: date
+          description: Date of the hearing
+        courtHearingLocation:
+          type: string
+          description: Court location as OU code (7 characters, final 2 denote the courtroom)
+        courtCentreId:
+          type: string
+          description: Reference data id of the court centre for courtHearingLocation
+        courtroomId:
+          type: string
+          description: >-
+            Reference data id of the courtroom for courtHearingLocation. Omitted when the OU code
+            does not resolve to a courtroom.
+        caseCount:
+          type: integer
+          minimum: 1
+          description: Number of cases in the group
 
     GroupCaseSearchResponse:
       type: object
