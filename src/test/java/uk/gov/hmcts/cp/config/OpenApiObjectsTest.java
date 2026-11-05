@@ -9,6 +9,8 @@ import uk.gov.hmcts.cp.openapi.model.DefendantAddress;
 import uk.gov.hmcts.cp.openapi.model.ErrorResponse;
 import uk.gov.hmcts.cp.openapi.model.ExtractCasesRequest;
 import uk.gov.hmcts.cp.openapi.model.GroupCaseResponse;
+import uk.gov.hmcts.cp.openapi.model.GroupCaseSearchResponse;
+import uk.gov.hmcts.cp.openapi.model.GroupCaseSummary;
 import uk.gov.hmcts.cp.openapi.model.GroupCaseWarningDetails;
 import uk.gov.hmcts.cp.openapi.model.GroupMemberCase;
 import java.lang.reflect.Field;
@@ -47,6 +49,19 @@ class OpenApiObjectsTest {
         assertThat(GroupCaseResponse.class).hasDeclaredFields(
                 "groupId", "leadCase", "referredCaseId", "cases", "caseCount", "createdDate",
                 "resultingIntent", "warning", "warningMessage", "warningDetails");
+    }
+
+    @Test
+    void generated_group_case_summary_should_have_expected_fields() {
+        assertThat(GroupCaseSummary.class).hasDeclaredFields(
+                "groupId", "prosecutingAuthority", "leadCase", "resultingIntent", "dateOfHearing",
+                "courtHearingLocation", "courtCentreId", "courtroomId", "caseCount");
+    }
+
+    @Test
+    void generated_group_case_search_response_should_have_expected_fields() {
+        assertThat(GroupCaseSearchResponse.class).hasDeclaredFields(
+                "groupCases", "page", "pageSize", "totalElements", "totalPages");
     }
 
     @Test
