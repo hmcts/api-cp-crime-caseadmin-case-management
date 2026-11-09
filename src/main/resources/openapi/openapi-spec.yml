@@ -141,13 +141,13 @@ paths:
             type: string
             format: date
         - in: query
-          name: page
+          name: pageNumber
           required: false
-          description: Zero-based page index
+          description: One-based page index
           schema:
             type: integer
-            minimum: 0
-            default: 0
+            minimum: 1
+            default: 1
         - in: query
           name: pageSize
           required: false
