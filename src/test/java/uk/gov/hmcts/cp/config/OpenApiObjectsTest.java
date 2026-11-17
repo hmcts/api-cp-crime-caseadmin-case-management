@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
 class OpenApiObjectsTest {
@@ -100,9 +101,9 @@ class OpenApiObjectsTest {
         assertThat(leadCaseField.getType())
                 .as("leadCase field type")
                 .isEqualTo(LeadCase.class);
-        assertThat(ExtractCasesRequest.class.getDeclaredFields())
-                .extracting(Field::getName)
-                .doesNotContain("leadCaseId");
+        assertThatThrownBy(() -> ExtractCasesRequest.class.getDeclaredField("leadCaseId"))
+                .as("leadCaseId is replaced by leadCase")
+                .isInstanceOf(NoSuchFieldException.class);
     }
 
     @Test
