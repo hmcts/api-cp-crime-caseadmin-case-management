@@ -13,6 +13,7 @@ import uk.gov.hmcts.cp.openapi.model.GroupCaseSearchResponse;
 import uk.gov.hmcts.cp.openapi.model.GroupCaseSummary;
 import uk.gov.hmcts.cp.openapi.model.GroupCaseWarningDetails;
 import uk.gov.hmcts.cp.openapi.model.GroupMemberCase;
+import uk.gov.hmcts.cp.openapi.model.LeadCase;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.UUID;
@@ -41,7 +42,7 @@ class OpenApiObjectsTest {
 
     @Test
     void generated_extract_cases_request_should_have_expected_fields() {
-        assertThat(ExtractCasesRequest.class).hasDeclaredFields("caseIds", "leadCaseId", "newGroup", "resultingIntent");
+        assertThat(ExtractCasesRequest.class).hasDeclaredFields("caseIds", "leadCase", "newGroup", "resultingIntent");
     }
 
     @Test
@@ -90,6 +91,18 @@ class OpenApiObjectsTest {
         assertThat(GroupCasesApi.class).hasDeclaredMethods(
                 "createGroupCase", "searchGroupCases", "getGroupCase",
                 "getGroupCaseResultingIntents", "extractGroupCases");
+    }
+
+    @Test
+    void extract_cases_request_lead_case_should_be_the_full_lead_case() throws Exception {
+        Field leadCaseField = ExtractCasesRequest.class.getDeclaredField("leadCase");
+
+        assertThat(leadCaseField.getType())
+                .as("leadCase field type")
+                .isEqualTo(LeadCase.class);
+        assertThat(ExtractCasesRequest.class.getDeclaredFields())
+                .extracting(Field::getName)
+                .doesNotContain("leadCaseId");
     }
 
     @Test

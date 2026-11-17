@@ -292,10 +292,12 @@ paths:
       description: >-
         Removes one or more cases from the group, either to individual standalone cases (newGroup=false)
         or to a newly created group case (newGroup=true). For a new group the back end generates the
-        groupId and chooses the lead case. If the original lead case is extracted, the back end selects
-        a new lead for the original group and reduces its caseCount. Rejected (400) if one or fewer cases
-        would remain in the original group. Permission: edit_group_case (Court Admin, Legal Advisor).
-        Audit required: Yes.
+        groupId and chooses the lead case. If the original lead case is extracted, the caller supplies the
+        new lead for the original group in leadCase (a case that stays in the group); the back end stores
+        it and reduces the group's caseCount. Synchronous: succeeds only when Progression accepts the
+        removal (202) and the group case record is updated; otherwise nothing is changed and an error is
+        returned. Rejected (400) if one or fewer cases would remain in the original group.
+        Permission: edit_group_case (Court Admin, Legal Advisor). Audit required: Yes.
       parameters:
         - $ref: '#/components/parameters/CjscppuidHeader'
         - $ref: '#/components/parameters/CppclientcorrelationidHeader'
@@ -308,13 +310,17 @@ paths:
               $ref: '#/components/schemas/ExtractCasesRequest'
       responses:
         '200':
-          description: Cases extracted. newGroupId is populated only when a new group was created.
+          description: Cases extracted to a new group (newGroup=true). Returns the id of the new group.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExtractCasesResponse'
+        '204':
+          description: Cases removed from the group as individual cases (newGroup=false). No body.
         '400':
-          description: Invalid payload, or fewer than 2 cases would remain in the original group
+          description: >-
+            Invalid payload, fewer than 2 cases would remain in the original group, leadCase missing
+            when the current lead case is removed, or leadCase supplied when it is not
           content:
             application/json:
               schema:
@@ -694,6 +700,11 @@ components:
 
     ExtractCasesRequest:
       type: object
+      description: >-
+        leadCase is required only when the current lead case is in caseIds. It is the case that becomes
+        the new lead of the original group and must be a case that stays in the group (not one of
+        caseIds); its leadCaseId, caseUrn and defendantName are stored as the group's lead. It must not
+        be supplied when the current lead case is not being removed.
       required:
         - caseIds
         - newGroup
@@ -706,10 +717,8 @@ components:
             type: string
             format: uuid
           description: Ids of the cases to extract
-        leadCaseId:
-          type: string
-          format: uuid
-          description: Optional. Supplied if the original lead case is being extracted; must match one of caseIds.
+        leadCase:
+          $ref: '#/components/schemas/LeadCase'
         newGroup:
           type: boolean
           description: true if the extracted cases form a new group, false for individual cases
@@ -718,11 +727,12 @@ components:
 
     ExtractCasesResponse:
       type: object
+      description: Returned only when the cases were extracted to a new group (newGroup=true).
       properties:
         newGroupId:
           type: string
           format: uuid
-          description: Id of the newly created group. Omitted when newGroup was false.
+          description: Id of the newly created group.
 
     ErrorResponse:
       type: object

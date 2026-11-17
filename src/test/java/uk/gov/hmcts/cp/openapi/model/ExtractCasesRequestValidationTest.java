@@ -16,6 +16,13 @@ class ExtractCasesRequestValidationTest {
                 .resultingIntent(ResultingIntent.ADJOURN);
     }
 
+    private static LeadCase.LeadCaseBuilder newLeadCase() {
+        return LeadCase.builder()
+                .leadCaseId(UUID.randomUUID())
+                .caseUrn("SAMPLEURN0001")
+                .defendantName("Sample Defendant");
+    }
+
     private static boolean hasViolation(ExtractCasesRequest request, String property) {
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             return !factory.getValidator().validateProperty(request, property).isEmpty();
@@ -30,10 +37,28 @@ class ExtractCasesRequestValidationTest {
     }
 
     @Test
-    void lead_case_id_is_optional() {
-        var request = validRequest().leadCaseId(null).build();
+    void lead_case_is_optional() {
+        var request = validRequest().leadCase(null).build();
 
-        assertThat(hasViolation(request, "leadCaseId")).isFalse();
+        assertThat(hasViolation(request, "leadCase")).isFalse();
+    }
+
+    @Test
+    void lead_case_without_case_urn_should_fail_validation() {
+        var request = validRequest().leadCase(newLeadCase().caseUrn(null).build()).build();
+
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            assertThat(factory.getValidator().validate(request)).isNotEmpty();
+        }
+    }
+
+    @Test
+    void lead_case_without_defendant_name_should_fail_validation() {
+        var request = validRequest().leadCase(newLeadCase().defendantName(null).build()).build();
+
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            assertThat(factory.getValidator().validate(request)).isNotEmpty();
+        }
     }
 
     @Test
@@ -64,13 +89,12 @@ class ExtractCasesRequestValidationTest {
     }
 
     @Test
-    void extracting_to_individual_cases_with_lead_case_selected_should_pass_validation() {
-        UUID leadCaseId = UUID.randomUUID();
+    void removing_the_lead_case_with_a_new_lead_case_should_pass_validation() {
         var request = ExtractCasesRequest.builder()
-                .caseIds(List.of(leadCaseId))
-                .leadCaseId(leadCaseId)
+                .caseIds(List.of(UUID.randomUUID()))
+                .leadCase(newLeadCase().build())
                 .newGroup(false)
-                .resultingIntent(ResultingIntent.WITHDRAW)
+                .resultingIntent(ResultingIntent.GRANT)
                 .build();
 
         try (var factory = Validation.buildDefaultValidatorFactory()) {
