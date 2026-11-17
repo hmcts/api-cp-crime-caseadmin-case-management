@@ -16,9 +16,9 @@ class ExtractCasesRequestValidationTest {
                 .resultingIntent(ResultingIntent.ADJOURN);
     }
 
-    private static LeadCase.LeadCaseBuilder newLeadCase() {
-        return LeadCase.builder()
-                .leadCaseId(UUID.randomUUID())
+    private static ExtractLeadCase.ExtractLeadCaseBuilder newLeadCase() {
+        return ExtractLeadCase.builder()
+                .caseId(UUID.randomUUID())
                 .caseUrn("SAMPLEURN0001")
                 .defendantName("Sample Defendant");
     }
@@ -41,6 +41,15 @@ class ExtractCasesRequestValidationTest {
         var request = validRequest().leadCase(null).build();
 
         assertThat(hasViolation(request, "leadCase")).isFalse();
+    }
+
+    @Test
+    void lead_case_without_case_id_should_fail_validation() {
+        var request = validRequest().leadCase(newLeadCase().caseId(null).build()).build();
+
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            assertThat(factory.getValidator().validate(request)).isNotEmpty();
+        }
     }
 
     @Test
