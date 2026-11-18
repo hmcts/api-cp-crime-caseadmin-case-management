@@ -290,14 +290,17 @@ paths:
         - group-cases
       summary: Extract cases from a group case
       description: >-
-        Removes one or more cases from the group, either to individual standalone cases (newGroup=false)
-        or to a newly created group case (newGroup=true). For a new group the back end generates the
-        groupId and chooses the lead case. If the original lead case is extracted, the caller supplies the
-        new lead for the original group in leadCase (a case that stays in the group); the back end stores
-        it and reduces the group's caseCount. Synchronous: succeeds only when Progression accepts the
+        Removes cases from the group, either to individual standalone cases (newGroup=false) or to a
+        newly created group case (newGroup=true). Currently supported: exactly one case with
+        newGroup=false; more than one case, or newGroup=true, is rejected (400) until those are
+        delivered. For a new group the back end will generate the groupId and choose the lead case.
+        Each successful removal reduces the group's caseCount by one. If the current lead case is
+        removed, the caller supplies the new lead for the group in leadCase (a case that stays in the
+        group) and the back end stores it. Synchronous: succeeds only when Progression accepts the
         removal (202) and the group case record is updated; otherwise nothing is changed and an error is
-        returned. Rejected (400) if one or fewer cases would remain in the original group.
-        Permission: edit_group_case (Court Admin, Legal Advisor). Audit required: Yes.
+        returned. Rejected (400) if the group has fewer than 2 cases, so a group of 2 can be reduced
+        to 1. Permission: edit_group_case (System Users, Legal Advisers, Court Associate, Court
+        Administrators). Audit required: Yes.
       parameters:
         - $ref: '#/components/parameters/CjscppuidHeader'
         - $ref: '#/components/parameters/CppclientcorrelationidHeader'
@@ -319,8 +322,9 @@ paths:
           description: Cases removed from the group as individual cases (newGroup=false). No body.
         '400':
           description: >-
-            Invalid payload, fewer than 2 cases would remain in the original group, leadCase missing
-            when the current lead case is removed, or leadCase supplied when it is not
+            Invalid payload; newGroup=true or more than one caseId (not supported yet); the group has
+            fewer than 2 cases; leadCase missing when the current lead case is removed, supplied when it
+            is not, or the same as the removed case
           content:
             application/json:
               schema:
@@ -338,7 +342,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
-          description: Internal server error
+          description: >-
+            Internal server error, including when Progression does not accept the removal (anything other
+            than 202) or the system user for the Progression call is not configured; nothing is changed
           content:
             application/json:
               schema:
@@ -716,7 +722,7 @@ components:
           items:
             type: string
             format: uuid
-          description: Ids of the cases to extract
+          description: Ids of the cases to extract. Currently exactly one is supported.
         leadCase:
           $ref: '#/components/schemas/ExtractLeadCase'
         newGroup:
