@@ -703,7 +703,7 @@ components:
       description: >-
         leadCase is required only when the current lead case is in caseIds. It is the case that becomes
         the new lead of the original group and must be a case that stays in the group (not one of
-        caseIds); its leadCaseId, caseUrn and defendantName are stored as the group's lead. It must not
+        caseIds); its caseId, caseUrn and defendantName are stored as the group's lead. It must not
         be supplied when the current lead case is not being removed.
       required:
         - caseIds
@@ -718,12 +718,33 @@ components:
             format: uuid
           description: Ids of the cases to extract
         leadCase:
-          $ref: '#/components/schemas/LeadCase'
+          $ref: '#/components/schemas/ExtractLeadCase'
         newGroup:
           type: boolean
           description: true if the extracted cases form a new group, false for individual cases
         resultingIntent:
           $ref: '#/components/schemas/ResultingIntent'
+
+    ExtractLeadCase:
+      type: object
+      description: The case that becomes the new lead of the original group. Contains personal data (defendant name).
+      required:
+        - caseId
+        - caseUrn
+        - defendantName
+      properties:
+        caseId:
+          type: string
+          format: uuid
+          description: Progression case id of the new lead case
+        caseUrn:
+          type: string
+          maxLength: 255
+          description: Case URN of the new lead case
+        defendantName:
+          type: string
+          maxLength: 255
+          description: Name of the lead defendant of the new lead case (personal data)
 
     ExtractCasesResponse:
       type: object

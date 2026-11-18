@@ -8,12 +8,12 @@ import uk.gov.hmcts.cp.openapi.model.CreateGroupCaseRequest;
 import uk.gov.hmcts.cp.openapi.model.DefendantAddress;
 import uk.gov.hmcts.cp.openapi.model.ErrorResponse;
 import uk.gov.hmcts.cp.openapi.model.ExtractCasesRequest;
+import uk.gov.hmcts.cp.openapi.model.ExtractLeadCase;
 import uk.gov.hmcts.cp.openapi.model.GroupCaseResponse;
 import uk.gov.hmcts.cp.openapi.model.GroupCaseSearchResponse;
 import uk.gov.hmcts.cp.openapi.model.GroupCaseSummary;
 import uk.gov.hmcts.cp.openapi.model.GroupCaseWarningDetails;
 import uk.gov.hmcts.cp.openapi.model.GroupMemberCase;
-import uk.gov.hmcts.cp.openapi.model.LeadCase;
 import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.UUID;
@@ -95,14 +95,24 @@ class OpenApiObjectsTest {
     }
 
     @Test
-    void extract_cases_request_lead_case_should_be_the_full_lead_case() throws Exception {
+    void extract_cases_request_lead_case_should_be_the_extract_lead_case() throws Exception {
         Field leadCaseField = ExtractCasesRequest.class.getDeclaredField("leadCase");
 
         assertThat(leadCaseField.getType())
                 .as("leadCase field type")
-                .isEqualTo(LeadCase.class);
+                .isEqualTo(ExtractLeadCase.class);
         assertThatThrownBy(() -> ExtractCasesRequest.class.getDeclaredField("leadCaseId"))
                 .as("leadCaseId is replaced by leadCase")
+                .isInstanceOf(NoSuchFieldException.class);
+    }
+
+    @Test
+    void extract_lead_case_should_use_case_id() throws Exception {
+        assertThat(ExtractLeadCase.class.getDeclaredField("caseId").getType())
+                .as("caseId field type")
+                .isEqualTo(UUID.class);
+        assertThatThrownBy(() -> ExtractLeadCase.class.getDeclaredField("leadCaseId"))
+                .as("leadCaseId is renamed to caseId")
                 .isInstanceOf(NoSuchFieldException.class);
     }
 
