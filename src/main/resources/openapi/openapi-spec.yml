@@ -664,7 +664,8 @@ components:
         warningMessage:
           type: string
           description: Human-readable detail of the warning, present only when warning is set
-          example: "There are total (%d) number of cases in this bulk, but due to technical issues, only (%d) number of cases are being displayed here. For further details please contact help desk."
+          example: "There are a total of [ %d ] cases in this bulk list, but due to technical issues, only [ %d ] cases are being displayed here. 
+          Please contact the help desk for further information and assistance."
         warningDetails:
           $ref: '#/components/schemas/GroupCaseWarningDetails'
 
